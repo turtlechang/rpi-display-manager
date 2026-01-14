@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
+from datetime import datetime
 import yaml
 import os
 import sys
@@ -82,6 +83,7 @@ def players_page():
         if 'name' not in player: player['name'] = 'Unknown'
         if 'ip_port' not in player: player['ip_port'] = '0.0.0.0:0'
         player['status'] = check_status(player['ip_port'])
+        player['last_checked'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         safe_players.append(player)
 
     return render_template('players.html', players=safe_players)

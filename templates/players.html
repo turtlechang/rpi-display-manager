@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,297 +10,334 @@
     <!-- 引入 Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; font-family: "Microsoft JhengHei", sans-serif; }
-        .card { box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: none; }
-        .table-hover tbody tr:hover { background-color: #f1f3f5; }
-        .status-badge { min-width: 80px; }
-        
+        body {
+            background-color: #f8f9fa;
+            font-family: "Microsoft JhengHei", sans-serif;
+        }
+
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f1f3f5;
+        }
+
+        .status-badge {
+            min-width: 80px;
+        }
+
         /* 篩選選單樣式 */
-        .filter-dropdown-menu { min-width: 200px; padding: 10px; max-height: 300px; overflow-y: auto; }
-        .filter-icon { cursor: pointer; color: #6c757d; }
-        .filter-icon:hover { color: #0d6efd; }
+        .filter-dropdown-menu {
+            min-width: 200px;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .filter-icon {
+            cursor: pointer;
+            color: #6c757d;
+        }
+
+        .filter-icon:hover {
+            color: #0d6efd;
+        }
 
         /* --- 版面穩定性優化 --- */
         /* 設定主機列表區塊的最小高度，防止篩選後版面塌陷 */
         .list-card-body {
             /* 調整為 55vh (視窗高度的 55%) */
-            min-height: 55vh; 
+            min-height: 55vh;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start; /* 內容靠上對齊 */
+            justify-content: flex-start;
+            /* 內容靠上對齊 */
         }
 
         /* [新增修正] 強制表格響應式容器填滿高度 */
         /* 解決下拉選單因容器過矮而被 overflow 裁切的問題 */
         .list-card-body .table-responsive {
-            flex: 1;         /* 自動填滿剩餘空間 */
-            width: 100%;     /* 確保寬度滿版 */
+            flex: 1;
+            /* 自動填滿剩餘空間 */
+            width: 100%;
+            /* 確保寬度滿版 */
             margin-bottom: 0;
         }
     </style>
 </head>
+
 <body>
 
-<nav class="navbar navbar-dark bg-dark mb-4">
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1"><i class="bi bi-tv"></i> 電視輪播後台管理</span>
+        </div>
+    </nav>
+
     <div class="container">
-        <span class="navbar-brand mb-0 h1"><i class="bi bi-tv"></i> 電視輪播後台管理</span>
-    </div>
-</nav>
 
-<div class="container">
-    
-    <!-- 新增主機區塊 -->
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <i class="bi bi-plus-circle"></i> 新增主機
+        <!-- 新增主機區塊 -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-plus-circle"></i> 新增主機
+            </div>
+            <div class="card-body">
+                <form action="/add" method="post" class="row g-3 align-items-end">
+                    <!-- 1. 體系 (維持 3 格) -->
+                    <div class="col-md-3">
+                        <label class="form-label">體系名稱</label>
+                        <input type="text" class="form-control" name="system" placeholder="例如：光澤" required>
+                    </div>
+                    <!-- 2. 名稱 (維持 3 格) -->
+                    <div class="col-md-3">
+                        <label class="form-label">主機名稱</label>
+                        <input type="text" class="form-control" name="name" placeholder="例如：大廳電視牆" required>
+                    </div>
+                    <!-- 3. IP (修改為 3 格，騰出空間給按鈕) -->
+                    <div class="col-md-3">
+                        <label class="form-label">IP位址與埠號</label>
+                        <input type="text" class="form-control" name="ip_port" placeholder="192.168.XXX.247:5000"
+                            required>
+                    </div>
+                    <!-- 4. 按鈕區 (修改為 3 格，並排兩個按鈕) -->
+                    <div class="col-md-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-success flex-fill">
+                            <i class="bi bi-save"></i> 新增
+                        </button>
+                        <!-- 新增：立即刷新按鈕 (藍色) -->
+                        <a href="/players" class="btn btn-primary flex-fill" title="重新載入資料並檢查連線">
+                            <i class="bi bi-arrow-clockwise"></i> 立即刷新
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="card-body">
-            <form action="/add" method="post" class="row g-3 align-items-end">
-                <!-- 1. 體系 (維持 3 格) -->
-                <div class="col-md-3">
-                    <label class="form-label">體系名稱</label>
-                    <input type="text" class="form-control" name="system" placeholder="例如：光澤" required>
-                </div>
-                <!-- 2. 名稱 (維持 3 格) -->
-                <div class="col-md-3">
-                    <label class="form-label">主機名稱</label>
-                    <input type="text" class="form-control" name="name" placeholder="例如：大廳電視牆" required>
-                </div>
-                <!-- 3. IP (修改為 3 格，騰出空間給按鈕) -->
-                <div class="col-md-3">
-                    <label class="form-label">IP位址與埠號</label>
-                    <input type="text" class="form-control" name="ip_port" placeholder="192.168.XXX.247:5000" required>
-                </div>
-                <!-- 4. 按鈕區 (修改為 3 格，並排兩個按鈕) -->
-                <div class="col-md-3 d-flex gap-2">
-                    <button type="submit" class="btn btn-success flex-fill">
-                        <i class="bi bi-save"></i> 新增
-                    </button>
-                    <!-- 新增：立即刷新按鈕 (藍色) -->
-                    <a href="/players" class="btn btn-primary flex-fill" title="重新載入資料並檢查連線">
-                        <i class="bi bi-arrow-clockwise"></i> 立即刷新
-                    </a>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    <!-- 主機列表區塊 -->
-    <div class="card">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-list-task"></i> 主機列表</span>
-            <span class="badge bg-secondary" id="total-count-badge">共 {{ players|length }} 筆</span>
-        </div>
-        <!-- 加入 list-card-body 類別，確保高度穩定 -->
-        <div class="card-body p-0 list-card-body">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="players-table">
-                    <thead class="table-light">
-                        <tr>
-                            <!-- 1. 體系 (含篩選功能) -->
-                            <th scope="col" width="15%">
-                                <div class="dropdown">
-                                    <span class="dropdown-toggle fw-bold" type="button" id="systemFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
-                                        體系 <i class="bi bi-funnel-fill small text-muted"></i>
-                                    </span>
-                                    <div class="dropdown-menu filter-dropdown-menu shadow" aria-labelledby="systemFilterDropdown">
-                                        <!-- 已移除標題與分隔線 -->
-                                        <div id="system-filter-options"></div>
+        <!-- 主機列表區塊 -->
+        <div class="card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-list-task"></i> 主機列表</span>
+                <span class="badge bg-secondary" id="total-count-badge">共 {{ players|length }} 筆</span>
+            </div>
+            <!-- 加入 list-card-body 類別，確保高度穩定 -->
+            <div class="card-body p-0 list-card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="players-table">
+                        <thead class="table-light">
+                            <tr>
+                                <!-- 1. 體系 (含篩選功能) -->
+                                <th scope="col" width="15%">
+                                    <div class="dropdown">
+                                        <span class="dropdown-toggle fw-bold" type="button" id="systemFilterDropdown"
+                                            data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
+                                            體系 <i class="bi bi-funnel-fill small text-muted"></i>
+                                        </span>
+                                        <div class="dropdown-menu filter-dropdown-menu shadow"
+                                            aria-labelledby="systemFilterDropdown">
+                                            <!-- 已移除標題與分隔線 -->
+                                            <div id="system-filter-options"></div>
+                                        </div>
                                     </div>
-                                </div>
-                            </th>
-                            
-                            <!-- 2. 名稱 -->
-                            <th scope="col" width="20%">名稱</th>
-                            
-                            <!-- 3. IP:Port -->
-                            <th scope="col" width="30%">IP:Port</th>
-                            
-                            <!-- 4. 狀態 -->
-                            <th scope="col" width="10%">狀態</th>
-                            
-                            <!-- 5. 操作 -->
-                            <th scope="col" width="25%">操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for player in players %}
-                        <tr class="player-row" data-system="{{ player.system }}">
-                            <td class="fw-bold text-secondary system-cell">{{ player.system }}</td>
-                            <td class="fw-bold">{{ player.name }}</td>
-                            <td class="text-muted font-monospace">
-                                <a href="http://{{ player.ip_port }}" target="_blank" class="text-decoration-none">
-                                    {{ player.ip_port }} <i class="bi bi-box-arrow-up-right small"></i>
-                                </a>
-                            </td>
-                            <td>
-                                {% if player.status == 'Online' %}
-                                <span class="badge bg-success rounded-pill status-badge">連線中</span>
-                                {% else %}
-                                <span class="badge bg-danger rounded-pill status-badge">離線</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <button type="button" class="btn btn-sm btn-outline-primary me-2" 
-                                        data-name="{{ player.name }}"
-                                        data-system="{{ player.system }}"
-                                        data-ip="{{ player.ip_port }}"
-                                        onclick="openEditModal(this)">
-                                    <i class="bi bi-pencil"></i> 編輯
-                                </button>
-                                <a href="/delete/{{ player.name }}" class="btn btn-sm btn-outline-danger" 
-                                   onclick="return confirm('確定要刪除 {{ player.name }} 嗎？');">
-                                    <i class="bi bi-trash"></i> 刪除
-                                </a>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="5" class="text-center text-muted py-4">目前沒有資料，請新增。</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                                </th>
+
+                                <!-- 2. 名稱 -->
+                                <th scope="col" width="20%">名稱</th>
+
+                                <!-- 3. IP:Port -->
+                                <th scope="col" width="30%">IP:Port</th>
+
+                                <!-- 4. 狀態 -->
+                                <th scope="col" width="10%">狀態</th>
+
+                                <!-- 5. 最後檢查時間 -->
+                                <th scope="col" width="15%">最後檢查時間</th>
+
+                                <!-- 6. 操作 -->
+                                <th scope="col" width="25%">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for player in players %}
+                            <tr class="player-row" data-system="{{ player.system }}">
+                                <td class="fw-bold text-secondary system-cell">{{ player.system }}</td>
+                                <td class="fw-bold">{{ player.name }}</td>
+                                <td class="text-muted font-monospace">
+                                    <a href="http://{{ player.ip_port }}" target="_blank" class="text-decoration-none">
+                                        {{ player.ip_port }} <i class="bi bi-box-arrow-up-right small"></i>
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if player.status == 'Online' %}
+                                    <span class="badge bg-success rounded-pill status-badge">連線中</span>
+                                    {% else %}
+                                    <span class="badge bg-danger rounded-pill status-badge">離線</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-muted small">
+                                    {{ player.last_checked }}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-outline-primary me-2"
+                                        data-name="{{ player.name }}" data-system="{{ player.system }}"
+                                        data-ip="{{ player.ip_port }}" onclick="openEditModal(this)">
+                                        <i class="bi bi-pencil"></i> 編輯
+                                    </button>
+                                    <a href="/delete/{{ player.name }}" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('確定要刪除 {{ player.name }} 嗎？');">
+                                        <i class="bi bi-trash"></i> 刪除
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">目前沒有資料，請新增。</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- 編輯 Modal -->
-<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form action="/edit_player" method="post">
-          <div class="modal-header">
-            <h5 class="modal-title">編輯主機資料</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <input type="hidden" id="edit-original-name" name="original_name">
-            <div class="mb-3">
-                <label class="form-label">體系名稱</label>
-                <input type="text" class="form-control" id="edit-system" name="system" required>
+    <!-- 編輯 Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="/edit_player" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title">編輯主機資料</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="edit-original-name" name="original_name">
+                        <div class="mb-3">
+                            <label class="form-label">體系名稱</label>
+                            <input type="text" class="form-control" id="edit-system" name="system" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">名稱</label>
+                            <input type="text" class="form-control" id="edit-name" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">IP:Port</label>
+                            <input type="text" class="form-control" id="edit-ip" name="ip_port" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="submit" class="btn btn-primary">儲存變更</button>
+                    </div>
+                </form>
             </div>
-            <div class="mb-3">
-                <label class="form-label">名稱</label>
-                <input type="text" class="form-control" id="edit-name" name="name" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">IP:Port</label>
-                <input type="text" class="form-control" id="edit-ip" name="ip_port" required>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-            <button type="submit" class="btn btn-primary">儲存變更</button>
-          </div>
-      </form>
+        </div>
     </div>
-  </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-// --- 編輯功能 ---
-function openEditModal(button) {
-    var name = button.getAttribute('data-name');
-    var system = button.getAttribute('data-system');
-    var ip = button.getAttribute('data-ip');
-    document.getElementById('edit-original-name').value = name;
-    document.getElementById('edit-name').value = name;
-    document.getElementById('edit-system').value = system;
-    document.getElementById('edit-ip').value = ip;
-    new bootstrap.Modal(document.getElementById('editModal')).show();
-}
+    <script>
+        // --- 編輯功能 ---
+        function openEditModal(button) {
+            var name = button.getAttribute('data-name');
+            var system = button.getAttribute('data-system');
+            var ip = button.getAttribute('data-ip');
+            document.getElementById('edit-original-name').value = name;
+            document.getElementById('edit-name').value = name;
+            document.getElementById('edit-system').value = system;
+            document.getElementById('edit-ip').value = ip;
+            new bootstrap.Modal(document.getElementById('editModal')).show();
+        }
 
-// --- 篩選功能 ---
-document.addEventListener('DOMContentLoaded', function() {
-    const table = document.getElementById('players-table');
-    const rows = table.querySelectorAll('.player-row');
-    const filterContainer = document.getElementById('system-filter-options');
-    const countBadge = document.getElementById('total-count-badge');
-    
-    // 1. 提取體系
-    const systems = new Set();
-    rows.forEach(row => {
-        const sys = row.getAttribute('data-system');
-        if (sys) systems.add(sys);
-    });
+        // --- 篩選功能 ---
+        document.addEventListener('DOMContentLoaded', function () {
+            const table = document.getElementById('players-table');
+            const rows = table.querySelectorAll('.player-row');
+            const filterContainer = document.getElementById('system-filter-options');
+            const countBadge = document.getElementById('total-count-badge');
 
-    // 2. 生成選單
-    if (systems.size > 0) {
-        const allDiv = document.createElement('div');
-        allDiv.className = 'form-check ms-2 mb-2';
-        allDiv.innerHTML = `
+            // 1. 提取體系
+            const systems = new Set();
+            rows.forEach(row => {
+                const sys = row.getAttribute('data-system');
+                if (sys) systems.add(sys);
+            });
+
+            // 2. 生成選單
+            if (systems.size > 0) {
+                const allDiv = document.createElement('div');
+                allDiv.className = 'form-check ms-2 mb-2';
+                allDiv.innerHTML = `
             <input class="form-check-input filter-checkbox" type="checkbox" value="ALL" id="filter-all" checked>
             <label class="form-check-label fw-bold" for="filter-all">全選 / 取消全選</label>
         `;
-        filterContainer.appendChild(allDiv);
+                filterContainer.appendChild(allDiv);
 
-        systems.forEach(sys => {
-            const div = document.createElement('div');
-            div.className = 'form-check ms-2';
-            div.innerHTML = `
+                systems.forEach(sys => {
+                    const div = document.createElement('div');
+                    div.className = 'form-check ms-2';
+                    div.innerHTML = `
                 <input class="form-check-input filter-checkbox filter-item" type="checkbox" value="${sys}" id="filter-${sys}" checked>
                 <label class="form-check-label" for="filter-${sys}">${sys}</label>
             `;
-            filterContainer.appendChild(div);
-        });
-    } else {
-        filterContainer.innerHTML = '<div class="p-2 text-muted small">無可篩選資料</div>';
-    }
-
-    // 3. 綁定事件
-    const checkboxes = document.querySelectorAll('.filter-checkbox');
-    const itemCheckboxes = document.querySelectorAll('.filter-item');
-    const allCheckbox = document.getElementById('filter-all');
-
-    checkboxes.forEach(box => {
-        box.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
-
-        box.addEventListener('change', function(e) {
-            const val = e.target.value;
-            const isChecked = e.target.checked;
-
-            if (val === 'ALL') {
-                itemCheckboxes.forEach(item => item.checked = isChecked);
+                    filterContainer.appendChild(div);
+                });
             } else {
-                if (!isChecked) {
-                    if (allCheckbox) allCheckbox.checked = false;
-                } else {
-                    const allChecked = Array.from(itemCheckboxes).every(i => i.checked);
-                    if (allCheckbox) allCheckbox.checked = allChecked;
-                }
+                filterContainer.innerHTML = '<div class="p-2 text-muted small">無可篩選資料</div>';
             }
-            applyFilter();
-        });
-    });
 
-    // 4. 執行篩選
-    function applyFilter() {
-        const checkedSystems = Array.from(itemCheckboxes)
-            .filter(box => box.checked)
-            .map(box => box.value);
+            // 3. 綁定事件
+            const checkboxes = document.querySelectorAll('.filter-checkbox');
+            const itemCheckboxes = document.querySelectorAll('.filter-item');
+            const allCheckbox = document.getElementById('filter-all');
 
-        let visibleCount = 0;
+            checkboxes.forEach(box => {
+                box.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                });
 
-        rows.forEach(row => {
-            const rowSys = row.getAttribute('data-system');
-            if (checkedSystems.includes(rowSys)) {
-                row.style.display = '';
-                visibleCount++;
-            } else {
-                row.style.display = 'none';
+                box.addEventListener('change', function (e) {
+                    const val = e.target.value;
+                    const isChecked = e.target.checked;
+
+                    if (val === 'ALL') {
+                        itemCheckboxes.forEach(item => item.checked = isChecked);
+                    } else {
+                        if (!isChecked) {
+                            if (allCheckbox) allCheckbox.checked = false;
+                        } else {
+                            const allChecked = Array.from(itemCheckboxes).every(i => i.checked);
+                            if (allCheckbox) allCheckbox.checked = allChecked;
+                        }
+                    }
+                    applyFilter();
+                });
+            });
+
+            // 4. 執行篩選
+            function applyFilter() {
+                const checkedSystems = Array.from(itemCheckboxes)
+                    .filter(box => box.checked)
+                    .map(box => box.value);
+
+                let visibleCount = 0;
+
+                rows.forEach(row => {
+                    const rowSys = row.getAttribute('data-system');
+                    if (checkedSystems.includes(rowSys)) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                if (countBadge) countBadge.textContent = `共 ${visibleCount} 筆`;
             }
         });
-        
-        if (countBadge) countBadge.textContent = `共 ${visibleCount} 筆`;
-    }
-});
-</script>
+    </script>
 
 </body>
+
 </html>
