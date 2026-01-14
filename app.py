@@ -12,8 +12,10 @@ sys.path.append(os.getcwd())
 
 try:
     # 嘗試從 status_players.py 匯入 CONFIG_PATH
-    from status_players import CONFIG_PATH
+    from status_players import CONFIG_PATH, start_checker_once, get_latest_report
     print(f"成功載入設定檔路徑: {CONFIG_PATH}")
+    # 啟動背景檢查
+    start_checker_once()
 except ImportError:
     CONFIG_PATH = 'players.yml'
     print(f"警告: 找不到 status_players.py，使用預設路徑: {CONFIG_PATH}")
@@ -74,16 +76,48 @@ def root():
 @app.route('/players', methods=['GET'])
 def players_page():
     full_data = load_players_data()
-    players = full_data.get('players', [])
+    players_config = full_data.get('players', [])
     
+    # 取得背景檢查的最新狀態
+    # 結構: {"players": [...], "updated_at": ...}
+    report = {}
+    try:
+        report = get_latest_report()
+    except NameError:
+        print("警告: get_latest_report 未定義 (可能匯入失敗)")
+    
+    # 建立快速查詢表 (以 ip_port 為 key)
+    # status_players.py 裡的 players list item: {name, ip_port, status, latency_ms, last_checked}
+    status_map = {p['ip_port']: p for p in report.get('players', [])}
+
     safe_players = []
-    for player in players:
+    for player in players_config:
         if not isinstance(player, dict): continue
         if 'system' not in player: player['system'] = ''
         if 'name' not in player: player['name'] = 'Unknown'
         if 'ip_port' not in player: player['ip_port'] = '0.0.0.0:0'
-        player['status'] = check_status(player['ip_port'])
-        player['last_checked'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        # 預設值
+        player['status'] = 'Unknown'
+        player['last_checked'] = '-'
+        
+        # 嘗試從 status_map 取得狀態
+        if player['ip_port'] in status_map:
+            st = status_map[player['ip_port']]
+            # 轉換狀態字串 (Online/Offline) - status_players 目前回傳 lowercase 'online'/'offline'
+            # 前端 badge 判斷是用 'Online' (首字大寫)
+            raw_status = st.get('status', 'offline')
+            player['status'] = 'Online' if raw_status == 'online' else 'Offline'
+            
+            # 轉換時間戳
+            ts = st.get('last_checked')
+            if ts:
+                dt = datetime.fromtimestamp(ts)
+                player['last_checked'] = dt.strftime('%Y-%m-%d %H:%M:%S')
+            
+            # 可選：也可以顯示延遲
+            # player['latency'] = st.get('latency_ms')
+
         safe_players.append(player)
 
     return render_template('players.html', players=safe_players)

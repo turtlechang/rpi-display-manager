@@ -160,6 +160,15 @@ def start_checker_once():
     _checker_started = True
 
 
+def get_latest_report() -> Dict[str, Any]:
+    with _state_lock:
+        # 回傳複本以免外部修改到內部狀態
+        return {
+            "players": list(_state["players"]),
+            "updated_at": _state["updated_at"]
+        }
+
+
 @players_bp.route("/players")
 def page_players():
     # 簡單 HTML，資料由前端 JS 打 /api/players 取得
